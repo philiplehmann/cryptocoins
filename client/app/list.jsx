@@ -35,7 +35,7 @@ class CoinList extends Component {
     updateConfig(Object.assign(config, { view: 'config' }))
   }
 
-  render() {
+  renderTable() {
     const { coins, config } = this.props
     const currency = config.currency || 'usd'
     const configCoins = config.coins || {}
@@ -75,19 +75,19 @@ class CoinList extends Component {
             <td>{formatNumber(coin[`24h_volume_${currency}`], 0)} {currencies[currency]}</td>
             <td>{formatNumber(coin[`market_cap_${currency}`], 0)} {currencies[currency]}</td>
             <td>{formatNumber(coin[`price_${currency}`])} {currencies[currency]}</td>
-            <td>
+            <td className={coin.percent_change_1h > coin1h.percent_change_1h ? 'table-success' : 'table-warning' }>
               {coin.percent_change_1h}%
               {coin.percent_change_1h > coin1h.percent_change_1h && '↑'}
               {coin.percent_change_1h < coin1h.percent_change_1h && '↓'}
               {coin.percent_change_1h == coin1h.percent_change_1h && '→'}
             </td>
-            <td>
+            <td className={coin.percent_change_24h > coin24h.percent_change_24h ? 'table-success' : 'table-warning' }>
               {coin.percent_change_24h}%
               {coin.percent_change_24h > coin24h.percent_change_24h && '↑'}
               {coin.percent_change_24h < coin24h.percent_change_24h && '↓'}
               {coin.percent_change_24h == coin24h.percent_change_24h && '→'}
             </td>
-            <td>
+            <td className={coin.percent_change_7d > coin7d.percent_change_7d ? 'table-success' : 'table-warning' }>
               {coin.percent_change_7d}%
               {coin.percent_change_7d > coin7d.percent_change_7d && '↑'}
               {coin.percent_change_7d < coin7d.percent_change_7d && '↓'}
@@ -104,10 +104,23 @@ class CoinList extends Component {
       </tbody>
       <tfoot>
         <tr>
-          <td colSpan="10" className="text-center"><button type="button" onClick={this.showConfig}>config</button></td>
+          <td colSpan="10" className="text-center">
+            <button type="button" className="btn btn-light" onClick={this.showConfig}>Config</button>
+          </td>
         </tr>
       </tfoot>
     </table>
+  }
+
+  renderLoading() {
+    const { connected } = this.props
+    return (connected ? <span>Loading...</span> : <div><span>Data not up to date, cannot connect to server!</span>{this.renderTable()}</div>)
+  }
+
+  render() {
+    const { connected, coins, config } = this.props
+    const configCoins = config.coins || {}
+    return ((connected && Object.keys(coins || {}).filter((k) => configCoins[k] != undefined).length > 0) ? this.renderTable() : this.renderLoading())
   }
 }
 

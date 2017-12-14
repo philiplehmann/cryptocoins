@@ -9,7 +9,8 @@ class Route extends Component {
     super(props)
     this.state = {
       coins: {},
-      config: JSON.parse(localStorage.getItem('config') || '{}')
+      config: JSON.parse(localStorage.getItem('config') || '{}'),
+      connected: false
     }
     this.socket = io('http://localhost:5100')
     this.updateConfig = this.updateConfig.bind(this)
@@ -17,7 +18,10 @@ class Route extends Component {
 
   componentDidMount() {
     this.socket.on('coinInit', (data) => {
-      this.setState({ coins: data })
+      this.setState({ coins: data, connected: true })
+    })
+    this.socket.on('coinDisconnect', () => {
+      this.setState({ connected: false })
     })
     this.socket.on('coinUpdate', (arr) => {
       const { coins } = this.state
@@ -29,7 +33,8 @@ class Route extends Component {
         return obj
       }, coins)
       this.setState({
-        coins: newCoins
+        coins: newCoins,
+        connected: true
       })
     })
   }
@@ -47,9 +52,9 @@ class Route extends Component {
   }
 
   render() {
-    const { coins, config } = this.state
+    const { coins, config, connected } = this.state
     const View = (config.view == 'config') ? Config : List
-    return  <View coins={coins} config={config} updateConfig={this.updateConfig}/>
+    return  <View coins={coins} config={config} connected={connected} updateConfig={this.updateConfig}/>
   }
 }
 
