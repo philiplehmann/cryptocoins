@@ -4,7 +4,7 @@
   "description": "",
   "main": "server/index.js",
   "scripts": {
-    "start": "server/index.js"
+    "start": "node server/index.js"
   },
   "author": "Pascal Rauser, Philip Lehmann",
   "license": "ISC",
