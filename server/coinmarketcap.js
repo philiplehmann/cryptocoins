@@ -40,7 +40,7 @@ const downloadUrl = url => {
   })
 }
 
-const fetchCoinsSuccess = (coinData, resolve, reject) => (arr) => {
+const fetchCoinsSuccess = (coinData, resolve) => (arr) => {
   const sendData = arr[0].map((entry, index) => {
     const data = arr.reduce((obj, secondArr) => {
       return Object.assign(obj, secondArr[index])
@@ -55,7 +55,7 @@ const fetchCoinsSuccess = (coinData, resolve, reject) => (arr) => {
   resolve(coinData, sendData)
 
   fs.writeFile('coinData.json', JSON.stringify(coinData), 'utf8', (err) => {
-    if (err) reject(err)
+    if (err) console.error(err)
   })
 }
 
@@ -65,7 +65,7 @@ const fetchCoins = (coinData) => {
       return downloadUrl(`https://api.coinmarketcap.com/v1/ticker/?convert=${currency}&start=0&limit=1100`)
     })
     Promise.all(promises).then(
-      fetchCoinsSuccess(coinData, resolve, reject),
+      fetchCoinsSuccess(coinData, resolve),
       reject
     )
   })

@@ -2,11 +2,6 @@ import React, { Component } from 'react'
 import { sortKeys } from './list'
 
 class Config extends Component {
-  constructor(props) {
-    super(props)
-    this.state = {}
-    this.showList = this.showList.bind(this)
-  }
 
   changeConfig(event, key) {
     const { config, updateConfig } = this.props
@@ -27,11 +22,6 @@ class Config extends Component {
     updateConfig(Object.assign(config, { coins: configCoins }))
   }
 
-  showList() {
-    const { config, updateConfig } = this.props
-    updateConfig(Object.assign(config, { view: 'list' }))
-  }
-
   changeCurrency(currency) {
     const { config, updateConfig } = this.props
     updateConfig(Object.assign(config, { currency: currency }))
@@ -48,6 +38,7 @@ class Config extends Component {
         <thead>
           <tr>
             <th scope="col">visible</th>
+            <th scope="col">rank</th>
             <th scope="col">name</th>
             <th scope="col">amount</th>
           </tr>
@@ -59,6 +50,9 @@ class Config extends Component {
             return <tr key={coin.id}>
               <td>
                 <input type="checkbox" checked={hasKey} onChange={(e) => this.changeConfig(e, key)}/>
+              </td>
+              <td>
+                {coin.rank}
               </td>
               <td>
                 {coin.name}
@@ -76,11 +70,6 @@ class Config extends Component {
             <td className={currency == 'eur' && 'table-info'} onClick={() => this.changeCurrency('eur')}>EUR</td>
           </tr>
         </tbody>
-        <tfoot>
-          <tr>
-            <td colSpan="3" className="text-center"><button type="button" onClick={this.showList}>list</button></td>
-          </tr>
-        </tfoot>
       </table>
     </div>
   }

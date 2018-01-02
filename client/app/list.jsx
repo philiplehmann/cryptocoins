@@ -52,16 +52,6 @@ const getPercentage = (coins, keys, config) => (field, total) => {
 
 class CoinList extends Component {
 
-  constructor(props) {
-    super(props)
-    this.showConfig = this.showConfig.bind(this)
-  }
-
-  showConfig() {
-    const { config, updateConfig } = this.props
-    updateConfig(Object.assign(config, { view: 'config' }))
-  }
-
   render() {
     const { coins, config } = this.props
     const currency = config.currency || 'usd'
@@ -137,13 +127,6 @@ class CoinList extends Component {
           <td>{formatNumber(total)} {currencies[currency]}</td>
         </tr>
       </tbody>
-      <tfoot>
-        <tr>
-          <td colSpan="10" className="text-center">
-            <button type="button" className="btn btn-light" onClick={this.showConfig}>Config</button>
-          </td>
-        </tr>
-      </tfoot>
     </table>
   }
 

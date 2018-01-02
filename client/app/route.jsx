@@ -4,6 +4,19 @@ import Config from './config'
 
 import io from 'socket.io-client'
 
+const LinkItem = (props) => {
+  const { label, value, config, updateConfig } = props
+  const active = config.view == value
+  return <li className="nav-item">
+    <a
+      className={active ? 'nav-link active' : 'nav-link'}
+      href={`#${value}`}
+      onClick={() => updateConfig(Object.assign(config, { view: value }))}>
+      {label}
+    </a>
+  </li>
+}
+
 class Route extends Component {
   constructor(props) {
     super(props)
@@ -24,6 +37,7 @@ class Route extends Component {
       this.setState({ connected: false })
     })
     this.socket.on('coinUpdate', (arr) => {
+      if(!arr) return
       const { coins } = this.state
       const newCoins = arr.reduce((obj, data) => {
         const arr = coins[data.id] || []
@@ -54,7 +68,13 @@ class Route extends Component {
   render() {
     const { coins, config, connected } = this.state
     const View = (config.view == 'config') ? Config : List
-    return  <View coins={coins} config={config} connected={connected} updateConfig={this.updateConfig}/>
+    return  <div>
+      <ul className="nav nav-tabs justify-content-center sticky-top" style={{ backgroundColor: '#fff' }}>
+        <LinkItem value="list" label="List" config={config} updateConfig={this.updateConfig} />
+        <LinkItem value="config" label="Config" config={config} updateConfig={this.updateConfig} />
+      </ul>
+      <View coins={coins} config={config} connected={connected} updateConfig={this.updateConfig}/>
+    </div>
   }
 }
 

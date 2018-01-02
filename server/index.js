@@ -39,7 +39,6 @@ const loadCoins = () => {
     io.emit('coinUpdate', sendData)
   }, (err) => {
     console.error(err)
-    io.emit('coinDisconnect')
   })
 }
 
