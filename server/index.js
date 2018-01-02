@@ -79,7 +79,7 @@ const fetchCoins = () => {
         }, {})
         const coinArr = coinData[data.id] || []
         const newArr = coinArr.concat(data)
-        if (newArr.length > 1000) newArr.shift()
+        if (newArr.length > 100) newArr.shift()
         coinData[data.id] = newArr
         return data
       })

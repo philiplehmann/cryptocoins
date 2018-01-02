@@ -23,6 +23,33 @@ const formatNumber = (number, decimals = 2) => {
   return `${number}`.replace(/(\d)(?=(\d{3})+(\.|$))/g, '$1\'')
 }
 
+const getCoin = (coins) => (key) => {
+  const arr = coins[key]
+  return arr[arr.length - 1]
+}
+
+const getChange = (coins) => (key) => {
+  const arr = coins[key]
+  const coin = arr[arr.length - 1]
+  const arr2 = [].concat(arr)
+  arr2.reverse()
+
+  return (field) => {
+    return arr2.find((c) => Number(c[field]) != Number(coin[field])) || arr[0]
+  }
+}
+
+const getPercentage = (coins, keys, config) => (field, total) => {
+  return keys.reduce((number, key) => {
+    const coin = getCoin(coins)(key)
+    const currency = config.currency || 'usd'
+    const configCoins = config.coins || {}
+    const coinBalance = Number(configCoins[key])
+    const yourAmount = Number(coin[`price_${currency}`]) * coinBalance
+    return Math.round((number + Number(coin[field] / 100 * (100 / total * yourAmount))) * 100) / 100
+  }, 0)
+}
+
 class CoinList extends Component {
 
   constructor(props) {
@@ -42,6 +69,9 @@ class CoinList extends Component {
     const keys = Object.keys(coins || {}).filter((k) => configCoins[k] != undefined)
     keys.sort(sortKeys(coins))
     let total = 0
+    const fetchCoin = getCoin(coins)
+    const fetchChange = getChange(coins)
+    const fetchPercentage = getPercentage(coins, keys, config)
     return <table className="table table-striped">
       <thead>
         <tr>
@@ -54,20 +84,20 @@ class CoinList extends Component {
           <th scope="col">1h</th>
           <th scope="col">24h</th>
           <th scope="col">7d</th>
-          <th scope="col">you</th>
+          <th scope="col">balance</th>
+          <th scope="col">{currencies[currency]}</th>
         </tr>
       </thead>
       <tbody>
         {keys.map((key) => {
-          const arr = coins[key]
-          const coin = arr[arr.length - 1]
-          const you = Number(coin[`price_${currency}`]) * Number(configCoins[key])
-          total += you
-          const arr2 = [].concat(arr)
-          arr2.reverse()
-          const coin1h = arr2.find((c) => Number(c.percent_change_1h) != Number(coin.percent_change_1h)) || arr[0]
-          const coin24h = arr2.find((c) => Number(c.percent_change_24h) != Number(coin.percent_change_24h)) || arr[0]
-          const coin7d = arr2.find((c) => Number(c.percent_change_7d) != Number(coin.percent_change_7d)) || arr[0]
+          const coin = fetchCoin(key)
+          const coinBalance = Number(configCoins[key])
+          const yourAmount = Number(coin[`price_${currency}`]) * coinBalance
+          total += yourAmount
+          const coinChange = fetchChange(key)
+          const coin1h = coinChange('percent_change_1h')
+          const coin24h = coinChange('percent_change_24h')
+          const coin7d = coinChange('percent_change_7d')
           return <tr key={coin.id}>
             <td>{coin.rank}</td>
             <td>{coin.symbol}</td>
@@ -93,12 +123,17 @@ class CoinList extends Component {
               {coin.percent_change_7d < coin7d.percent_change_7d && '↓'}
               {coin.percent_change_7d == coin7d.percent_change_7d && '→'}
             </td>
-            <td>{(Number(configCoins[key]) > 0) && formatNumber(you)} {currencies[currency]}</td>
+            <td>{Number(configCoins[key])}</td>
+            <td>{(Number(configCoins[key]) > 0) && formatNumber(yourAmount)}</td>
           </tr>
         })}
         <tr>
-          <td colSpan="8"></td>
+          <td colSpan="5"></td>
           <td>total</td>
+          <td>{fetchPercentage('percent_change_1h', total)}%</td>
+          <td>{fetchPercentage('percent_change_24h', total)}%</td>
+          <td>{fetchPercentage('percent_change_7d', total)}%</td>
+          <td></td>
           <td>{formatNumber(total)} {currencies[currency]}</td>
         </tr>
       </tbody>
