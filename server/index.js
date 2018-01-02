@@ -14,13 +14,13 @@ const fetchCoins = require('./coinmarketcap')
 
 const PUBLIC_DIR = path.join(__dirname, '../public')
 const isDevelopment = process.env.NODE_ENV !== 'production'
-const config = require('../webpack/config.' + (isDevelopment ? 'dev' : 'prod'))
-const compiler = Webpack(config)
 
 const HOST = process.env.HOST || '0.0.0.0'
 const PORT = process.env.PORT || 5000
 
 if(isDevelopment) {
+  const config = require('../webpack/config.dev')
+  const compiler = Webpack(config)
   app.use(webpackDevMiddleware(compiler))
   app.use(webpackHotMiddleware(compiler))
   app.use(express.static(PUBLIC_DIR))

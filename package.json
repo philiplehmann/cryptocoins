@@ -5,7 +5,7 @@
   "main": "server/index.js",
   "scripts": {
     "start": "node server/index.js",
-    "heroku-postbuild": "yarn run webpack --config webpack/config.prod.js"
+    "heroku-postbuild": "node build.js"
   },
   "author": "Pascal Rauser, Philip Lehmann, Joris Morger",
   "license": "ISC",
@@ -125,7 +125,7 @@
     "socket.io-client": "^2.0.3",
     "style-loader": "^0.13.1",
     "url-loader": "^0.5.7",
-    "webpack": "2.5.1",
+    "webpack": "^3.8.1",
     "webpack-dev-middleware": "^2.0.3",
     "webpack-hot-middleware": "^2.21.0",
     "webpack-merge": "^4.1.1"
