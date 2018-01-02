@@ -62,7 +62,7 @@ class CoinList extends Component {
     updateConfig(Object.assign(config, { view: 'config' }))
   }
 
-  renderTable() {
+  render() {
     const { coins, config } = this.props
     const currency = config.currency || 'usd'
     const configCoins = config.coins || {}
@@ -147,16 +147,16 @@ class CoinList extends Component {
     </table>
   }
 
-  renderLoading() {
-    const { connected } = this.props
-    return (connected ? <span>Loading...</span> : <div><span>Data not up to date, cannot connect to server!</span>{this.renderTable()}</div>)
-  }
+  // renderLoading() {
+  //   const { connected } = this.props
+  //   return (connected ? <span>Loading...</span> : <div><span>Data not up to date, cannot connect to server!</span>{this.renderTable()}</div>)
+  // }
 
-  render() {
-    const { connected, coins, config } = this.props
-    const configCoins = config.coins || {}
-    return ((connected && Object.keys(coins || {}).filter((k) => configCoins[k] != undefined).length > 0) ? this.renderTable() : this.renderLoading())
-  }
+  // render() {
+  //   const { connected, coins, config } = this.props
+  //   const configCoins = config.coins || {}
+  //   return ((connected && Object.keys(coins || {}).filter((k) => configCoins[k] != undefined).length > 0) ? this.renderTable() : this.renderLoading())
+  // }
 }
 
 export default CoinList

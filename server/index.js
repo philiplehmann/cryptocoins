@@ -46,7 +46,7 @@ const loadCoins = () => {
 setInterval(loadCoins, 5 * 60 * 1000)
 fs.readFile('coinData.json', 'utf8', (err, data) => {
   if (err) {
-    console.log(err)
+    console.error(err)
   } else {
     coinData = JSON.parse(data)
   }
@@ -54,10 +54,10 @@ fs.readFile('coinData.json', 'utf8', (err, data) => {
 })
 
 io.on('connection', socket => {
-  console.log('new connection compiled')
+  console.info('new connection')
   socket.emit('coinInit', coinData)
 
   socket.on('disconnect', () => {
-    console.log('connection lost')
+    console.info('connection lost')
   })
 })
