@@ -11,7 +11,6 @@ module.exports = (wizard) => {
     entry: {
       'scripts/index': [
         path.resolve('src', 'helpers', 'babel-polyfill.js'),
-        `webpack-dev-server/client?http://${HOST}:${PORT}`,
         path.resolve('src', 'apps', wizard, 'routes.js')
       ]
     },

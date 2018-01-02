@@ -11,7 +11,6 @@ module.exports =  {
   entry: {
     'scripts/index': [
       'babel-polyfill',
-      'webpack-dev-server/client?http://localhost:5000',
       path.resolve('client', 'index.js')
     ]
   },

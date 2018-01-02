@@ -1,110 +1,76 @@
-/* global require process */
+/* global require process __dirname */
 /* eslint no-console: off */
 
 const Webpack = require('webpack')
 const path = require('path')
-const WebpackDevServer = require('webpack-dev-server')
+const webpackDevMiddleware = require('webpack-dev-middleware')
+const webpackHotMiddleware = require('webpack-hot-middleware')
 const config = require('../webpack/config')
-const app = require('express')()
+const express = require('express')
+const app = express()
 const server = require('http').Server(app)
 const io = require('socket.io')(server)
-const https = require('https')
 const fs = require('fs')
+const fetchCoins = require('./coinmarketcap')
 
-const compiler = Webpack([config])
+const PUBLIC_DIR = path.join(__dirname, '../public')
+const HTML_FILE = path.join(PUBLIC_DIR, 'index.html')
+const isDevelopment = process.env.NODE_ENV !== 'production'
 
-const HOST = process.env.HOST || 'localhost'
+const compiler = Webpack(config)
+
+const HOST = process.env.HOST || '0.0.0.0'
 const PORT = process.env.PORT || 5000
-const webpackServer = new WebpackDevServer(compiler, {
-  inline: true,
-  stats: { colors: true },
-  contentBase: path.resolve('public'),
-  https: false,
-  host: HOST,
-  port: PORT,
-  public: `${HOST}:${PORT}`
-})
-webpackServer.listen(PORT, HOST)
+// const webpackServer = new WebpackDevServer(compiler, {
+//   inline: true,
+//   stats: { colors: true },
+//   contentBase: path.resolve('public'),
+//   https: false,
+//   host: HOST,
+//   port: PORT,
+//   public: `${HOST}:${PORT}`
+// })
+// webpackServer.listen(PORT, HOST)
 
-//const coins = ['bitcoin', 'ethereum', 'aragon', 'augur', 'basic-attention-token', 'dash', 'decred', 'golem', 'litecoin', 'omisego', 'qtum']
-const currencies = ['USD', 'CHF', 'EUR']
+console.log(HTML_FILE)
 
-const downloadUrl = url => {
-  return new Promise((resolve, reject) => {
-    https
-      .get(url, res => {
-        const contentType = res.headers['content-type']
+if(isDevelopment) {
+  app.use(webpackDevMiddleware(compiler))
 
-        if (res.statusCode !== 200) {
-          reject('Request Failed.\n' + `Status Code: ${res.statusCode}`)
-          return res.resume()
-        } else if (!/^application\/json/.test(contentType)) {
-          reject('Invalid content-type.\n' + `Expected application/json but received ${contentType}`)
-          return res.resume()
-        }
+  app.use(webpackHotMiddleware(compiler))
 
-        res.setEncoding('utf8')
-        let rawData = ''
-        res.on('data', chunk => {
-          rawData += chunk
-        })
-        res.on('end', () => {
-          try {
-            const parsedData = JSON.parse(rawData)
-            resolve(parsedData)
-          } catch (e) {
-            reject(e.message)
-          }
-        })
-      })
-      .on('error', e => {
-        reject(`Got error: ${e.message}`)
-      })
+  app.get('*', (req, res) => {
+    res.sendFile(HTML_FILE)
   })
+} else {
+  app.use(express.static(PUBLIC_DIR))
+
+  app.get('*', (req, res) => res.sendFile(HTML_FILE))
 }
 
-server.listen(5100)
+server.listen(PORT, HOST)
 
 let coinData = {}
 
-const fetchCoins = () => {
-  const promises = currencies.map(currency => {
-    return downloadUrl(`https://api.coinmarketcap.com/v1/ticker/?convert=${currency}&start=0&limit=1100`)
+const loadCoins = () => {
+  fetchCoins(coinData).then((data, sendData) => {
+    coinData = data
+    console.log('send coinUpdate')
+    io.emit('coinUpdate', sendData)
+  }, (err) => {
+    console.error(err)
+    io.emit('coinDisconnect')
   })
-  Promise.all(promises).then(
-    arr => {
-      const sendData = arr[0].map((entry, index) => {
-        const data = arr.reduce((obj, secondArr) => {
-          return Object.assign(obj, secondArr[index])
-        }, {})
-        const coinArr = coinData[data.id] || []
-        const newArr = coinArr.concat(data)
-        if (newArr.length > 100) newArr.shift()
-        coinData[data.id] = newArr
-        return data
-      })
-
-      console.log('send coinUpdate')
-      io.emit('coinUpdate', sendData)
-
-      fs.writeFile('coinData.json', JSON.stringify(coinData), 'utf8', err => {
-        if (err) console.log(err)
-      })
-    },
-    () => {
-      io.emit('coinDisconnect')
-    }
-  )
 }
 
-setInterval(fetchCoins, 60 * 1000)
+setInterval(loadCoins, 5 * 60 * 1000)
 fs.readFile('coinData.json', 'utf8', (err, data) => {
   if (err) {
     console.log(err)
   } else {
     coinData = JSON.parse(data)
-    fetchCoins()
   }
+  fetchCoins(coinData)
 })
 
 io.on('connection', socket => {

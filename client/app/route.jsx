@@ -12,7 +12,7 @@ class Route extends Component {
       config: JSON.parse(localStorage.getItem('config') || '{}'),
       connected: false
     }
-    this.socket = io('http://localhost:5100')
+    this.socket = io(window.location.protocol + '//' + window.location.host)
     this.updateConfig = this.updateConfig.bind(this)
   }
 
