@@ -5,7 +5,6 @@ const Webpack = require('webpack')
 const path = require('path')
 const webpackDevMiddleware = require('webpack-dev-middleware')
 const webpackHotMiddleware = require('webpack-hot-middleware')
-const config = require('../webpack/config')
 const express = require('express')
 const app = express()
 const server = require('http').Server(app)
@@ -14,38 +13,19 @@ const fs = require('fs')
 const fetchCoins = require('./coinmarketcap')
 
 const PUBLIC_DIR = path.join(__dirname, '../public')
-const HTML_FILE = path.join(PUBLIC_DIR, 'index.html')
 const isDevelopment = process.env.NODE_ENV !== 'production'
-
+const config = require('../webpack/config.' + (isDevelopment ? 'dev' : 'prod'))
 const compiler = Webpack(config)
 
 const HOST = process.env.HOST || '0.0.0.0'
 const PORT = process.env.PORT || 5000
-// const webpackServer = new WebpackDevServer(compiler, {
-//   inline: true,
-//   stats: { colors: true },
-//   contentBase: path.resolve('public'),
-//   https: false,
-//   host: HOST,
-//   port: PORT,
-//   public: `${HOST}:${PORT}`
-// })
-// webpackServer.listen(PORT, HOST)
-
-console.log(HTML_FILE)
 
 if(isDevelopment) {
   app.use(webpackDevMiddleware(compiler))
-
   app.use(webpackHotMiddleware(compiler))
-
-  app.get('*', (req, res) => {
-    res.sendFile(HTML_FILE)
-  })
+  app.use(express.static(PUBLIC_DIR))
 } else {
   app.use(express.static(PUBLIC_DIR))
-
-  app.get('*', (req, res) => res.sendFile(HTML_FILE))
 }
 
 server.listen(PORT, HOST)

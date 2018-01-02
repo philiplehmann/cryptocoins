@@ -1,5 +1,4 @@
 /*global require module */
-const webpack = require('webpack')
 const path = require('path')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const extractTextPlugin = new ExtractTextPlugin({
@@ -78,16 +77,10 @@ module.exports =  {
   },
   output: {
     filename: '[name].js',
-    path: path.resolve('public/'),
+    path: path.resolve('public'),
     publicPath: '/',
-    sourceMapFilename: '[file].map'
   },
-  devtool: 'source-map',
   plugins: [
-    extractTextPlugin,
-    new webpack.NoEmitOnErrorsPlugin(),
-    new webpack.HotModuleReplacementPlugin(),
-    new webpack.NamedModulesPlugin(),
-    new webpack.NoEmitOnErrorsPlugin()
+    extractTextPlugin
   ]
 }

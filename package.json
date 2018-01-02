@@ -4,9 +4,10 @@
   "description": "",
   "main": "server/index.js",
   "scripts": {
-    "start": "node server/index.js"
+    "start": "node server/index.js",
+    "heroku-postbuild": "yarn run webpack --config webpack/config.prod.js"
   },
-  "author": "Pascal Rauser, Philip Lehmann",
+  "author": "Pascal Rauser, Philip Lehmann, Joris Morger",
   "license": "ISC",
   "babel": {
     "presets": [
@@ -120,9 +121,7 @@
     "style-loader": "^0.13.1",
     "url-loader": "^0.5.7",
     "webpack": "2.5.1",
-    "webpack-merge": "4.1.0"
-  },
-  "dependencies": {
+    "webpack-merge": "4.1.0",
     "pg": "^7.4.0",
     "prop-types": "^15.5.8",
     "react": "15.5.4",
