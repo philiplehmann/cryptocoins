@@ -1,6 +1,7 @@
 /* global require process __dirname */
 /* eslint no-console: off */
 
+require('dotenv').config()
 const Webpack = require('webpack')
 const path = require('path')
 const webpackDevMiddleware = require('webpack-dev-middleware')
@@ -43,13 +44,15 @@ const loadCoins = () => {
 }
 
 setInterval(loadCoins, 5 * 60 * 1000)
-fs.readFile('coinData.json', 'utf8', (err, data) => {
+fs.readFile(path.resolve('coinData.json'), 'utf8', (err, data) => {
   if (err) {
     console.error(err)
   } else {
     coinData = JSON.parse(data)
   }
-  fetchCoins(coinData)
+  fetchCoins(coinData).catch((err) => {
+    console.error(err)
+  })
 })
 
 io.on('connection', socket => {

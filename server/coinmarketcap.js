@@ -1,47 +1,34 @@
-/* global require module */
+/* global require module process */
 /* eslint no-console: off */
-const https = require('https')
 const fs = require('fs')
+const path = require('path')
+const rp = require('request-promise')
+
 
 //const coins = ['bitcoin', 'ethereum', 'aragon', 'augur', 'basic-attention-token', 'dash', 'decred', 'golem', 'litecoin', 'omisego', 'qtum']
 const currencies = ['USD', 'CHF', 'EUR']
+const apiKey = process.env.COINMARKETCAP_API_KEY
 
-const downloadUrl = url => {
-  return new Promise((resolve, reject) => {
-    https
-      .get(url, res => {
-        const contentType = res.headers['content-type']
-
-        if (res.statusCode !== 200) {
-          reject('Request Failed.\n' + `Status Code: ${res.statusCode}`)
-          return res.resume()
-        } else if (!/^application\/json/.test(contentType)) {
-          reject('Invalid content-type.\n' + `Expected application/json but received ${contentType}`)
-          return res.resume()
-        }
-
-        res.setEncoding('utf8')
-        let rawData = ''
-        res.on('data', chunk => {
-          rawData += chunk
-        })
-        res.on('end', () => {
-          try {
-            const parsedData = JSON.parse(rawData)
-            resolve(parsedData)
-          } catch (e) {
-            reject(e.message)
-          }
-        })
-      })
-      .on('error', e => {
-        reject(`Got error: ${e.message}`)
-      })
-  })
+const getOptions = (currency) => {
+  return {
+    method: 'GET',
+    uri: 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest',
+    qs: {
+      'start': '1',
+      'limit': '5000',
+      'convert': currency
+    },
+    headers: {
+      'X-CMC_PRO_API_KEY': apiKey
+    },
+    json: true,
+    gzip: true
+  }
 }
 
 const fetchCoinsSuccess = (coinData, resolve) => (arr) => {
-  const sendData = arr[0].map((entry, index) => {
+  console.log(JSON.stringify(arr, null, 2))
+  const sendData = arr[0].data[0].map((entry, index) => {
     const data = arr.reduce((obj, secondArr) => {
       return Object.assign(obj, secondArr[index])
     }, {})
@@ -54,15 +41,15 @@ const fetchCoinsSuccess = (coinData, resolve) => (arr) => {
 
   resolve(coinData, sendData)
 
-  fs.writeFile('coinData.json', JSON.stringify(coinData), 'utf8', (err) => {
+  fs.writeFile(path.resolve('coinData.json'), JSON.stringify(coinData), 'utf8', (err) => {
     if (err) console.error(err)
   })
 }
 
 const fetchCoins = (coinData) => {
   return new Promise((resolve, reject) => {
-    const promises = currencies.map(currency => {
-      return downloadUrl(`https://api.coinmarketcap.com/v1/ticker/?convert=${currency}&start=0&limit=1100`)
+    const promises = currencies.map((currency) => {
+      return rp(getOptions(currency))
     })
     Promise.all(promises).then(
       fetchCoinsSuccess(coinData, resolve),

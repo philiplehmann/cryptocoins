@@ -1,15 +1,9 @@
 /*global require module */
 const path = require('path')
-const ExtractTextPlugin = require('extract-text-webpack-plugin')
-const extractTextPlugin = new ExtractTextPlugin({
-  filename: 'styles/index.css',
-  allChunks: true
-})
 
 module.exports =  {
   entry: {
     'scripts/index': [
-      'babel-polyfill',
       path.resolve('client', 'index.js')
     ]
   },
@@ -17,11 +11,13 @@ module.exports =  {
   module: {
     rules: [
       {
-        test: /\.jsx?$/,
+        test: /\.m?jsx?$/,
         exclude: /node_modules/,
-        loader: 'babel-loader',
-        options: {
-          presets: ['es2015', 'stage-0', 'react']
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env']
+          }
         }
       },
       {
@@ -50,20 +46,15 @@ module.exports =  {
         loader: 'url-loader'
       },
       {
-        test: /(\.scss|\.css)$/,
-        loader: extractTextPlugin.extract({ fallback: 'style-loader', use: [
-          {
-            loader: 'css-loader',
-            options: {
-              sourceMap: true,
-              importLoaders: 1,
-              localIdentName: '[name]__[local]___[hash:base64:5]'
-            }
-          },
-          {
-            loader: 'sass-loader'
-          }
-        ] })
+        test: /\.s[ac]ss$/i,
+        use: [
+          // Creates `style` nodes from JS strings
+          'style-loader',
+          // Translates CSS into CommonJS
+          'css-loader',
+          // Compiles Sass to CSS
+          'sass-loader',
+        ],
       }
     ]
   },
@@ -79,8 +70,5 @@ module.exports =  {
     filename: '[name].js',
     path: path.resolve('public'),
     publicPath: '/',
-  },
-  plugins: [
-    extractTextPlugin
-  ]
+  }
 }

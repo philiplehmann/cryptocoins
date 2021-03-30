@@ -1,11 +1,11 @@
 /*global require module*/
 const webpack = require('webpack')
-const merge = require('webpack-merge')
+const { merge } = require('webpack-merge')
 const config = require('./config')
 
-module.exports = merge.smart(config, {
+module.exports = merge(config, {
+  mode: 'production',
   plugins: [
-    new webpack.NamedModulesPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
     new webpack.optimize.UglifyJsPlugin({
       compress: {
