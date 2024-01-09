@@ -28,7 +28,7 @@ const getOptions = (currency) => {
 
 const fetchCoinsSuccess = (coinData, resolve) => (arr) => {
   console.log(JSON.stringify(arr, null, 2))
-  const sendData = arr[0].data[0].map((entry, index) => {
+  const sendData = arr[0].data.map((entry, index) => {
     const data = arr.reduce((obj, secondArr) => {
       return Object.assign(obj, secondArr[index])
     }, {})
