@@ -3,3 +3,4 @@ yarn-error.log
 coinData.json
 public/scripts/**
 .env
+.yarn/install-state.gz
